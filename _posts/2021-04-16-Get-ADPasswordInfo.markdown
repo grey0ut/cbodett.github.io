@@ -1,23 +1,24 @@
 ---
 layout: posts
 title: Get-ADPasswordInfo
+classes: wide
 ---
 When I first started getting in to Powershell I was working in an IT Security position and was sifting through a lot of "noise" in the SEIM alerts.  The main offender was account lockouts.  Typically, if I looked up the user in Active Directory I'd find out that they had recently changed their password, and so it wasn't anomalous behavior for them to have locked their account.  But, getting this information from the AD/UC snapin was very slow, and some of the information was more easily gleaned through Powershell.  One of the Sys Admins had given me a script they wrote that kind of did what I wanted, but I decided to write my own.  
 
 Running the following command got me to a good starting place:
-~~~Powershell
+```Powershell   
 Get-ADuser -Identity JohnSmith -Properties * | Select-Object *
-~~~
+```
 This gave me all of the possible properties a user object from AD might contain and what their values were. A little bit of searching and I had my list of properties I wanted to query for a specific user.
-~~~Powershell
+```Powershell
 Get-ADuser -Identity JohnSmith -Properties Displayname,Passwordlastset,Badpasswordtime,msDS-userpasswordexpirytimecomputed,lockedout,accountlockouttime,LastBadPasswordAttempt
-~~~
+```
 That's kind of long to look at and as it turns out, the value stored within "msDS-userpasswordexpirytimecomputed" isn't very friendly so you need to convert it to something more human readable:
-~~~Powershell
+```Powershell
 Get-ADuser -Identity JohnSmith -Properties Displayname,Passwordlastset,Badpasswordtime,msDS-userpasswordexpirytimecomputed,lockedout,accountlockouttime,LastBadPasswordAttempt | Select-Object @{Name="ExpiryDate";Expression={[datetime]::fromfiletime($_."msds-userpasswordexpirytimecomputed")}}
-~~~
+```
 Great, not it's even longer. Obviously there's no way I'm going to remember all of that every time I want to get this information, so this is a perfect opportunity for a Powershell function.  When I have a lot of object properties to deal with I like to set up hashtables so I can splat them at the cmdlet.
-~~~Powershell
+```Powershell
 $GetADUserArgs = [ordered]@{
     Identity = $User
     Server = $Server
@@ -30,9 +31,9 @@ $GetADUserArgs = [ordered]@{
         'accountlockouttime',
         'LastBadPasswordAttempt')
 }
-~~~
+```
 I've got 3 parameters for the Get-ADuser cmdlet I want to provide values for and one of them (Properties) I've got 7 values to provide.  Creating this ahead of time in the above format makes it much easier to read and better for the next person who comes along to edit it.  I also need to convert that one time property to a human readable version in a Select-Object statement so I might as well set up a similar block for that.
-~~~Powershell
+```Powershell
 $SelObjArgs = [ordered]@{
     Property = @("Displayname",
                 "Passwordlastset",
@@ -42,13 +43,13 @@ $SelObjArgs = [ordered]@{
                 @{Name="LastFailedAuth";Expression={ $_.lastbadpasswordattempt}}
     )
 }
-~~~
+```
 The last two are just to rename the properties "AccountLockoutTime" and "LastBadPasswordAttempt" so that my results are a little shorter and easier to look at.  With those two variables defined my cmdlet execution get's to look pretty concise.
-~~~Powershell
+```Powershell
 Get-ADUser @GetADUserArgs | Select-Object  @SelObjArgs
-~~~
+```
 Now we just need to build the function around this and we're almost there
-~~~Powershell
+```Powershell
 Function Get-ADPasswordInfo {
     Param(
     [cmdletbinding()]
@@ -101,16 +102,16 @@ End {
 } # end of End block
 } # end of function
 
-~~~
+```
 I omitted the Get-Help info at the top, but I always recommend writing this so other people can understand how to use your code. Execution of this function might look something like this.
-~~~Powershell
+```Powershell
 Get-ADPasswordInfo -User cbodett
 Displayname            Passwordlastset      ExpiryDate           Lockedout LockoutTime LastFailedAuth
 -----------            ---------------      ----------           --------- ----------- --------------
 Bodett, Courtney        2/13/2020 3:44:03 PM 4/13/2020 4:44:03 PM     False             3/16/2020 7:16:02 AM
-~~~
+```
 Since it's an advanced function it supports pipeline input, and the Begin and Process blocks are built around this idea too.  This means you can pipe a bunch of usernames to the function, it will process them all, and then spit out a big table with all of your results.  I would often just do this:
-~~~Powershell
+```Powershell
 Search-ADaccount -Lockedout | Select-Object -Expand samaccountname | Get-ADPasswordInfo
-~~~
+```
 This would get me the pertinent password information about every account that was currently locked out.  A quick glance at when their password expired and when they last changed it would usually let me know whether or not this required much further investigation.
