@@ -3,6 +3,7 @@ layout: single
 title: About
 permalink: /about/
 classes: wide
+author_profile: true
 ---
 
 Hello, my name is Courtney Bodett.  I am an IT professional in the Pacific Northwest. I've always been casual tinkerer with many things throughout my life. Curious about how things work, but also a little scared that if I tried to work on anything myself I might break it.  When I was in highschool I decided that I wanted to be a bicycle mechanic and so I went to school to learn how. A short while later I had graduated from a school for this trade and got a job at a local shop turning wrenches. 

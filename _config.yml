@@ -95,7 +95,7 @@ analytics:
 # Site Author
 author:
   name             : "Courtney Bodett"
-  avatar           : # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
+  avatar           : "/assets/images/avatar.jpg"
   bio              : "I am curious tinkerer and I like solving problems"
   location         : "United States"
   email            :
