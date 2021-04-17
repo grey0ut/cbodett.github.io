@@ -3,7 +3,7 @@ layout: posts
 title: Get-ADPasswordInfo
 classes: wide
 ---
-When I first started getting in to Powershell I was working in an IT Security position and was sifting through a lot of "noise" in the SEIM alerts.  The main offender was account lockouts.  Typically, if I looked up the user in Active Directory I'd find out that they had recently changed their password, and so it wasn't anomalous behavior for them to have locked their account.  But, getting this information from the AD/UC snapin was very slow, and some of the information was more easily gleaned through Powershell.  One of the Sys Admins had given me a script they wrote that kind of did what I wanted, but I decided to write my own.  
+When I first started getting in to Powershell I was working in an IT Security position and was sifting through a lot of "noise" in the SIEM alerts.  The main offender was account lockouts.  Typically, if I looked up the user in Active Directory I'd find out that they had recently changed their password, and so it wasn't anomalous behavior for them to have locked their account.  But, getting this information from the AD/UC snapin was very slow, and some of the information was more easily gleaned through Powershell.  One of the Sys Admins had given me a script they wrote that kind of did what I wanted, but I decided to write my own.  
 
 Running the following command got me to a good starting place:
 {% highlight Powershell %}
