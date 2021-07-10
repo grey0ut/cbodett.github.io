@@ -2,7 +2,7 @@
 layout: posts
 title: Parsing log files with Powershell
 classes: wide
-date: 2021-07-07
+date: 2021-07-10
 ---
 
 Early on when I first started using Powershell I was dealing with some firewall logs from a perimeter firewall.  They were exported from a SIEM in CSV format, which I appreciated, but the format within was odd and not condusive to what I was trying to do.  I was having a hard time wrapping my mind around how to deal with them in Powershell and some helpful person on Stackoverflow suggested I use regex to match each row, capture a value, and when the last row of a particular entry was matched, spit out a PSCustomObject with all the property/value pairs I wanted.  
