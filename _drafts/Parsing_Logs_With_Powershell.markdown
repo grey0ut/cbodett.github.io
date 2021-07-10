@@ -8,7 +8,7 @@ date: 2021-07-07
 Early on when I first started using Powershell I was dealing with some firewall logs from a perimeter firewall.  They were exported from a SIEM in CSV format, which I appreciated, but the format within was odd and not condusive to what I was trying to do.  I was having a hard time wrapping my mind around how to deal with them in Powershell and some helpful person on Stackoverflow suggested I use regex to match each row, capture a value, and when the last row of a particular entry was matched, spit out a PSCustomObject with all the property/value pairs I wanted.  
 I no longer have an example of this data handy but I can replicate something similar:
 
-|        |       |            |          |  
+| Column1 | Column2 | Column3 | Column4 |  
 | ------------- | ------------ | ----------------- | ---------------- |  
 | 192.168.10.15 |              |                   |                  |  
 |               | ip.dstport 443 |                  |                 |  
@@ -34,6 +34,15 @@ $Data = Get-Content $CSVpath | ForEach-Object {
     }
 }
 {% endhighlight %}
+
+The resulting output for a single entry would look like this:
+
+{% highlight Powershell %}
+DestIP        DestPort SrcIP       Session_Count
+------        -------- -----       -------------
+192.168.10.15 443      10.15.120.2 1492
+{% endhighlight %}
+
 
 If the first three Regex statements look a little intimidating I would highly recommend checking out [Regex101.com](https://www.regex101.com). It's a great way to write and test regex statements in real time against data you provide.  Each Regex statement above is stored in a corresponding variable with the intent being to match against the first row of one of my intended entries, then the second, and lastly the third. Upon matching the 3rd and final row of an entry it returns a PSCustomObject with the property names of my choosing, and the values I've captured.  Again, this was suggested to me by another user on Stackoverflow but I loved the logic of it, and it absolutely worked for what I was doing.  
 
@@ -116,7 +125,72 @@ $Results = Foreach ($Line in $Log){
 }
 {% endhighlight %}
 
-This worked pretty well for the small sampling the user provided, but then I remembered just how painfully big those ENS text files could get and I wondered if there wasn't a faster way than all of those "if" statements.  After a little bit of searching I found someone mention that you could actually specifiy a text file with the Switch command and use a switch block to process all the regex patterns. 
+Output for the 3 log entries shown above would instead look like this:
+
+```
+Time            : 06/29/2021 08:06:56
+Event           : Traffic
+IP              : Redacted
+Description     :
+Path            :
+Message         : Blocked Incoming UDP
+SourceIP        : Redacted
+SourcePort      : 54915
+DestinationIP   : Redacted
+DestinationPort : 54915
+Rule            : Block all traffic
+
+Time            : 06/29/2021 08:06:57
+Event           : Traffic
+IP              : Redacted
+Description     :
+Path            :
+Message         : Blocked Incoming UDP  
+SourceIP        : Redacted
+SourcePort      : 5353
+DestinationIP   : 224.0.0.251
+DestinationPort : 5353
+Rule            : Block all traffic
+
+Time            : 06/29/2021 08:06:57
+Event           : Traffic
+IP              : Redacted
+Description     :
+Path            :
+Message         : Blocked Incoming UDP
+SourceIP        : Redacted
+SourcePort      : 54915
+DestinationIP   : Redacted
+DestinationPort : 54915
+Rule            : Block all traffic
+```
+
+I realize this looks pretty similar, but if you pipe the output to Format-Table it changes the way you can look at these logs significantly:
+
+```
+Time                 Event    IP       Description Path Message                SourceIP SourcePort DestinationIP DestinationPort
+----                 -----    --       ----------- ---- -------                -------- ---------- ------------- ---------------
+06/29/2021 08:06:56  Traffic  Redacted                  Blocked Incoming UDP   Redacted 54915      Redacted      54915
+06/29/2021 08:06:57  Traffic  Redacted                  Blocked Incoming UDP   Redacted 5353       224.0.0.251   5353
+06/29/2021 08:06:57  Traffic  Redacted                  Blocked Incoming UDP   Redacted 54915      Redacted      54915
+```
+
+In real-world examples where "Description" and "Path" have values it would likely push the table off the viewable screen, but now that our logs are objects with properties we can take advantage of Where-Object to help us filter:
+
+{% highlight Powershell %}
+$Results | Where-Object {$_.DestinationPort -eq "5353"} | Select-Object SourceIP,DestinationIP,DestinationPort
+
+SourceIP DestinationIP DestinationPort
+-------- ------------- ---------------
+Redacted 224.0.0.251   5353
+Redacted 224.0.0.251   5353
+Redacted 224.0.0.251   5353
+...
+{% endhighlight %}
+
+## Let's speed it up
+
+This worked pretty well for the small sampling the user provided, but then I remembered just how painfully big those ENS text files could get and I wondered if there wasn't a faster way than all of those "if" statements.  After a little bit of searching I found someone mention that you could actually specify a text file with the Switch command and use a switch block to process all the regex patterns. 
 Same Regex patterns as before, just swapping out how the text is processed:
 
 {% highlight Powershell %}
@@ -151,7 +225,9 @@ $Results = switch -regex -file C:\scripts\Testing\ENSlog.txt {
 }
 {% endhighlight %}
 
-In some short examples this proved to be a bit faster (in milliseconds) than the previous method.  I artificially bloated up my sample log file by copying and pasting the data over and over again until I had reached 1,000,000+ lines. I found a [blog post](http://www.happysysadm.com/2014/10/reading-large-text-files-with-powershell.html) that tested a bunch of different methods for reading text files and a .NET method proved to work nicely.
+In some short examples this proved to be a bit faster (in milliseconds) than the previous method.  I artificially bloated up my sample log file by copying and pasting the data over and over again until I had reached 1,000,000+ lines. The Switch block was definitely faster than the If statements but it was the difference between 4 and a half minutes and 4 minutes. 
+I found a [blog post](http://www.happysysadm.com/2014/10/reading-large-text-files-with-powershell.html) that tested a bunch of different methods for reading text files and they found a .NET method that proved to work nicely.
+All together now:
 
 {% highlight Powershell %}
 
@@ -207,6 +283,6 @@ $job = Receive-Job -name 'ensjob'
 $job
 {% endhighlight %}
 
-Here it is all wrapped in a Start-Job because, despite the performance increase of the .NET method over Get-Content, processing a million lines of text still seems to take upwards of a minute depending on the circumstances.  If it's running as a job then I can create a nice little Do/While loop to provide an animation to watch so I at least feel like something is happening.
+You'll notice I wrapped it in a Start-Job because, despite the performance increase of the .NET method over Get-Content, processing a million lines of text still seems to take upwards of a minute depending on the circumstances.  If it's running as a job then I can create a nice little Do/While loop to provide an animation to watch so I at least feel like something is happening.
 
-I will have to update this post more in the future as I learn more. For now, just take it as an example that Regex and Powershell together can help with processing log files in a variety of formats.
+This is all still based on a Reddit user's provided log example.  I will have to get my hands on some real logs to do some more testing, but if the performance is there I can envision a Powershell module for dealing with ENS logs.  I will have to update this post more in the future as I learn more. For now, just take it as an example that Regex and Powershell together can help with processing log files in a variety of formats.
