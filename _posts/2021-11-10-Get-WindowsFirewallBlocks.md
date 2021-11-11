@@ -11,7 +11,7 @@ I've had some exposure to Microsoft Defender here and there, but I was in a clas
 # The Logs  
 If you open Event Viewer and expand the "Applications and Services Logs", then "Microsoft", "Windows", and finally "Windows Firewall With Advanced Security" you'll find the "Firewall" log.  
 ![GWFB1]({{ "/assets/images/GWFB_01.png" | absolute_url }})  
-This log contains entries regarding firewall rule changes, network profile changes and so on.  It also contains entries under the ID '2011' where Defender *would* have notified the user that an application was blocked from accepting an inbound connection.  Instead that notification is not enabled (on the systems I'm talking about) so it is intead logged in Event Viewer.  
+This log contains entries regarding firewall rule changes, network profile changes and so on.  It also contains entries under the ID '2011' where Defender *would* have notified the user that an application was blocked from accepting an inbound connection.  Instead that notification is not enabled (on the systems I'm talking about) so it is instead logged in Event Viewer.  
   
 It's simple enough to filter the current log in Event Viewer and just look at the ones with Event ID 2011, but the actual message that's logged is where the good info is:  
 ![GWFB2]({{ "/assets/images/GWFB_02.png" | absolute_url }})  
@@ -127,9 +127,9 @@ Function Get-WindowsFirewallBlocks {
     Gets the block messages from the "Windows Firewall with Advanced Security" Event Viewer Log
     .NOTES
     Version:        1.0
-	Author:         C. Bodett
-	Creation Date:  11/10/2021
-	Purpose/Change: Initial function development
+    Author:         C. Bodett
+    Creation Date:  11/10/2021
+    Purpose/Change: Initial function development
     #>
     [cmdletbinding()]
     [Alias("GWFB")]

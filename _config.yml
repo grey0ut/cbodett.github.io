@@ -131,6 +131,9 @@ footer:
     - label: "GitHub"
       icon: "fab fa-fw fa-github"
       url: "https://github.com/grey0ut"
+    - label: "Buy me a coffee"
+      icon: "fas fa-fw fa-mug-hot"
+      url: "https://ko-fi.com/courtneybodett"
     - label: "GitLab"
       icon: "fab fa-fw fa-gitlab"
       # url:
