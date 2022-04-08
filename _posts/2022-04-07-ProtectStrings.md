@@ -6,13 +6,16 @@ date: 2022-4-7
 ---
 
 I've had an itch lately to do something with AES encryption in Powershell.  I've tossed around the idea of building a password manager in Powershell, but I get so focused on the little details that I lose sight of the fact that Microsoft [pretty much has that covered](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.secretmanagement/?view=ps-modules).  
+  
 I've used ConvertTo/From-SecureString quite a bit for string management in scripts and I've even gone as far as creating a small module that allows me to save a credential using DPAPI encryption to an environmental variable for recall later.  I have yet to do anything with AES encryption however.  I have some scratch sheets saved regarding a more robust password manager module, but nothing has really come of it yet.  
+  
 Two things happened recently to change some of this:  I found myself with a need to encrypt some strings locally and save them to a file, and a coworker went down the rabbit hole of protecting PS credential objects with AES encryption.  What follows is the story of ProtectString: A Powershell Module.
 # Table Of Contents  
 *  
 {:toc}  
 ## Protecting Credentials with AES  
 There are a lot of good articles out there on how to save Powershell credentials securely for use in scripts. Heck, [I wrote one](https://courtneybodett.com/Secure-Creds-In-Powershell/).  For the sake of this post though let's go over, specifically, the use of AES encryption for saving Powershell Credentials.  
+   
 SecureString objects in Powershell are protected by Microsoft's DPAPI encryption. Here's the [Wikipedia Page](https://en.wikipedia.org/wiki/Data_Protection_API) on DPAPI.  Essentially the unique encryption key is derived from the user running it on the system they're on.  If a different user of the same computer tried to decrypt it using DPAPI it would fail.  Move the DPAPI encrypted cipher text to another machine and try to decrypt it and it will fail as well.  Not very portable, but it's very convenient on the system you're on.  Using the Get-Credential cmdlet will yield a pop-up window where you can securely supply the password.
 {% highlight Powershell %} 
 Get-Credential TestUser  
