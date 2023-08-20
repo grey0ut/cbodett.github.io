@@ -93,4 +93,14 @@ The last three lines were added to support better execution of this script via a
 The behavior at the end is simply that when the user hits "enter" (or really anything to satisfy the Read-Host cmdlet) the script moves to the next execution statement which is an "Exit" causing the window to close.  
 You may have also noticed the lines regarding validating the service account credentials are correct.  This is just another sanity check to deal with the potential error of the administrator providing an incorrect password for the service account.  Had we not validated it there then the Start-Job cmdlet would have likely generated an error when the credentials didn't work.  Since I had written this little validation block before I thought I would recycle it.  
 
-There you have it.  A secure way to leverage service accounts, Windows Task Scheduler, Powershell and saved credentials. 
+There you have it.  A secure way to leverage service accounts, Windows Task Scheduler, Powershell and saved credentials.  
+# Update  
+Sometime in the Spring of 2023 Microsoft pushed out a security update and I'm attributing the change in behavior to that.  What happened was the script that was being executed via a shortcut starting erroring out.  
+![Error]({{ "/assets/images/PS_credential_08.png" | absolute_url }})  
+The key part here is the "Access Denied".  When it first happened I stepped through the script in ISE, line by line, and did not encounter the error.  I chalked it up to "who knows" and moved on. But a few months later it was time to update the password and it happened again.  I quickly realized I had launched ISE as Administrator and that was the difference: double-clicking the shortcut would launch a standard Powershell session.  I ran the script from an Administrative Powershell session and it worked no problem.  
+After some testing it appears that now if you want to use Start-Job with the -Credential parameter it needs to be ran with administrative rights.  To update the process on our end I edited the shortcut file. Under "Advanced..." there is a checkbox for "Run as administrator" which will cause the shortcut to always elevate to administrative rights and spawns a UAC prompt.  This caused the script to fail to run and I believe it's because the spawned Powershell session was starting in "C:\Windows\System32" regardless of what you configure in the "Start in" field.  Passing the -File parameter to Powershell.exe wasn't working either.  
+To fix this I changed the "Target" statement in the shortcut to look like this:  
+{% highlight Powershell %}
+powershell.exe -exec bypass -command "& {pushd 'C:\scripts'; .\Save-FTPCredentials.ps1}"  
+{% endhighlight %}  
+That got us back up and running.  
