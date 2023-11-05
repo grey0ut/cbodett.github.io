@@ -6,7 +6,7 @@ date: 2023-08-20
 ---  
 Hi all.  Just wanted to provide a brief status update.  It's been a while since my last post and while I have been busy, and making frequent use of Powershell, I haven't had anything novel that I felt like sharing.  
   
-I've still been using the Get-GeoLocation function quite a bit as well as another function I wrote called Get-WhoIsIP.  It's nothing crazy and primarily leverages "http://ipwho.is" API for results.  I spent a lot of time using Powershell as a CLI and want a way to quickly look up IP addresses to determine ownership.  Sometimes lots of IP addresses.  
+I've still been using the Get-GeoLocation function quite a bit as well as another function I wrote called Get-WhoIsIP.  It's nothing crazy and primarily leverages "http://ipwho.is" API for results.  I spend a lot of time using Powershell as a CLI and want a way to quickly look up IP addresses to determine ownership.  Sometimes lots of IP addresses.  
   
 Primarily I would say that I've had a lot of occasion to help other people with their Powershell related needs.  Here are some highlight topics I can think of:  
 - modified a Domain Join script to handle adding a computer to groups as part of the process.   
