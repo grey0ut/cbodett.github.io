@@ -12,8 +12,8 @@ I continued reading and doing some experimenting on an older laptop and eventual
 {:toc}  
 
 # What Is "Deniable Encryption"
-Ok, but what exactlyl does "deniable encryption" mean, and where's my self descruct button?  [Wikipedia](https://en.wikipedia.org/wiki/Deniable_encryption) has a decent page describing what deniable encryption means.  Basically for my context this means if anyone were to inspect the laptop or the drive itself there would be no evidence that the drive contained any data or even any encrypted data.  
-It turns out that with Luks encryption, by default, the first 16MB of a targeted partition for a Luks container is used to store the Luks header and the keyslots for unlocking the Luks container.  The "nuke password" option from Kali operates by deleting the keys from the Luks header.  This is unrecoverable and basically turns all of your encrypted data into pure entropy.  However, the Luks header still exists and by its exxistence implies that there *was* encrypted data there.  
+Ok, but what exactlyl does "deniable encryption" mean, and where's my self destruct button?  [Wikipedia](https://en.wikipedia.org/wiki/Deniable_encryption) has a decent page describing what deniable encryption means.  Basically for my context this means if anyone were to inspect the laptop or the drive itself there would be no evidence that the drive contained any data or even any encrypted data.  
+It turns out that with Luks encryption, by default, the first 16MB of a targeted partition for a Luks container is used to store the Luks header and the keyslots for unlocking the Luks container.  The "nuke password" option from Kali operates by deleting the keys from the Luks header.  This is unrecoverable and basically turns all of your encrypted data into pure entropy.  However, the Luks header still exists and by its existence implies that there *was* encrypted data there.  
 Luks has the option to work with a detached header, whereby you create the header and store it somewhere else.  This could be a file, or another disk partition.  I experimented with putting both the boot partition and the Luks header on a removable USB drive and using the entire internal drive as a Luks container.  With the USB drive removed there is no bootable partition, and the internal drive looks like random data from the first bit to the end.  
 
 # Why Do This?  
@@ -26,7 +26,7 @@ I have mostly used Ubuntu since first getting in to Linux and had only really he
 The first step is to boot the Arch Linux ISO.  It's always best to go out and get the most current one from Arch as they publish a new version every month.  I've been using [Ventoy](https://www.ventoy.net/en/index.html) for a while to consolidate dozens of different ISOs on to one physical media.  With a new version of the Arch ISO copied over to my Ventoy drive I'll boot my Framework 13 and mash F12 to get the one-time boot menu.  Select my Ventoy drive, and from the menu select the Arch ISO.  
   
 # Disk Setup  
-Once the Arch installer finishes booting the first step is to identify the disks we'll be working with.  In my case I've got an internal NVME drive and a Framework 250GB expansion card occupying one of the expansion card slots.  This registers as a USB drive and will end up containing the boot partition as well as the detatched Luks header.  
+Once the Arch installer finishes booting the first step is to identify the disks we'll be working with.  In my case I've got an internal NVME drive and a Framework 250GB expansion card occupying one of the expansion card slots.  This registers as a USB drive and will end up containing the boot partition as well as the detached Luks header.  
 Using the `lsblk` command to list the current disks:  
 {% highlight sh %}
 root@archiso ~ # lsblk
