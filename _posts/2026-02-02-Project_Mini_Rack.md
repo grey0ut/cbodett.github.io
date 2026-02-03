@@ -67,7 +67,9 @@ The Ubuntu VM was still able to boot and didn't appear any worse for the wear.
 Now that I had some time post holidays I got SMTP notifications set up, configured Network UPS Tools (NUT) on each node to make them UPS aware via a NUT server running on my Synology, and tested failover and UPS settings.  
 As a test I tried migrating an existing VM from my ESXi host to the new Proxmox cluster and it went pretty smoothly.  However, for the other things left on my ESXi host I decided to deploy those services as Docker containers in the new rack.  
   
-Now I have over a dozen containers running in the homelab with services like Immich, qBittorrent, Nginx Proxy Manager and most importantly Nextcloud.  
+Now I have over a dozen containers running in the homelab with services like Immich, qBittorrent, Nginx Proxy Manager and most importantly Nextcloud.  The one remaining constraint seems to be memory.  Ceph uses a decent amount of memory on it's own. Each node idles at about 4GB of RAM with nothing else going on.  A single Debian VM with all of the containers on it puts a node at about 80% RAM utilization.  Ordinarily I would just upgrade each one of these nodes to 24GB or 32GB of RAM, but with the current pricing it's not a priority.  
+# Conclusion  
+This whole project took a handful of months, which was helpful for spreading the cost out.  Just about anybody could pick up a used computer at this point and be on their way to a totally viable homelab.  The mini rack form factor is nice for space saving and if you've got access to a 3d printer the sky is the limit it seems like.  
 
 
 
